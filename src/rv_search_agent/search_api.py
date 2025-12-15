@@ -400,6 +400,7 @@ def search_rv_listings(
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,
     location: Optional[str] = None,
+    source: Optional[str] = None,
     max_results: int = 20,
     demo_mode: Optional[bool] = None,
 ) -> List[RVListing]:
@@ -416,6 +417,7 @@ def search_rv_listings(
         min_year: Minimum year filter
         max_year: Maximum year filter
         location: Region/location to search
+        source: Filter by source (e.g., "Dealer", "Facebook Marketplace")
         max_results: Maximum number of results (default 20)
         demo_mode: Force demo mode on/off (default: auto-detect)
 
@@ -435,6 +437,7 @@ def search_rv_listings(
             min_year=min_year,
             max_year=max_year,
             location=location,
+            source=source,
             max_results=max_results,
         )
     else:
@@ -458,6 +461,7 @@ def _search_demo(
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,
     location: Optional[str] = None,
+    source: Optional[str] = None,
     max_results: int = 20,
 ) -> List[RVListing]:
     """Search demo listings with filters."""
@@ -488,6 +492,10 @@ def _search_demo(
 
         if location and listing.location:
             if location.lower() not in listing.location.lower():
+                continue
+
+        if source and listing.source:
+            if source.lower() not in listing.source.lower():
                 continue
 
         results.append(listing)
