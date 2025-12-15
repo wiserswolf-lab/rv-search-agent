@@ -168,10 +168,31 @@ rv-search-agent/
 │   ├── cli.py             # Command-line interface
 │   ├── models.py          # RVListing data model
 │   └── search_api.py      # Search with demo data + Craigslist RSS
+├── tests/
+│   └── test_cli.py        # CLI and search tests
 ├── .env.example
 ├── pyproject.toml
 └── README.md
 ```
+
+## Testing
+
+```bash
+# Install test dependencies
+pip install pytest
+
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage (optional)
+pip install pytest-cov
+pytest tests/ --cov=src/rv_search_agent
+```
+
+**Test coverage:**
+- Search API filters (query, year, price, source, type)
+- CLI argument parsing and output
+- Sorting functionality (price, year)
 
 ## Demo Data
 
