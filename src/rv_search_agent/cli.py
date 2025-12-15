@@ -3,8 +3,28 @@
 
 import argparse
 import sys
+import webbrowser
+from urllib.parse import quote
 
 from .search_api import search_rv_listings
+
+
+def open_fb_marketplace(query: str = None, min_price: int = None, max_price: int = None):
+    """Open Facebook Marketplace search in browser."""
+    base_url = "https://www.facebook.com/marketplace/vehicles"
+
+    # Build search query
+    search_term = query or "RV motorhome"
+    url = f"{base_url}?query={quote(search_term)}"
+
+    # Add price filters if specified
+    if min_price:
+        url += f"&minPrice={min_price}"
+    if max_price:
+        url += f"&maxPrice={max_price}"
+
+    print(f"Opening Facebook Marketplace: {search_term}")
+    webbrowser.open(url)
 
 
 def main():
@@ -68,8 +88,18 @@ Examples:
         action="store_true",
         help="Show detailed listing information",
     )
+    parser.add_argument(
+        "--open-fb",
+        action="store_true",
+        help="Open Facebook Marketplace search in browser",
+    )
 
     args = parser.parse_args()
+
+    # Open Facebook Marketplace if requested
+    if args.open_fb:
+        open_fb_marketplace(args.query, args.min_price, args.max_price)
+        sys.exit(0)
 
     # Run search
     listings = search_rv_listings(
