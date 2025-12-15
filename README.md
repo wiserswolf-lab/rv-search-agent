@@ -175,11 +175,11 @@ rv-search-agent/
 
 ## Demo Data
 
-The demo mode includes 28 sample listings covering:
+The demo mode includes 37 sample listings covering:
 
 **Sources:**
-- 10 Dealer listings
-- 8 Facebook Marketplace listings (with mileage)
+- 25 Dealer listings
+- 12 Facebook Marketplace listings (with mileage)
 
 **Storyteller Overland Models:**
 - Classic MODE (OG & XO)
@@ -187,11 +187,15 @@ The demo mode includes 28 sample listings covering:
 - Stealth MODE
 - Dark MODE
 
+**Unity (Leisure Travel Vans) Models:**
+- U24RL Rear Lounge
+- U24TB Twin Bed
+
 **Other Brands:**
 - Winnebago, Thor, Jayco, Airstream, Coachmen, Fleetwood, etc.
 
-**Types:** Class A, B, C motorhomes, Travel Trailers, Fifth Wheels
+**Types:** Class A, B, B+, C motorhomes, Travel Trailers, Fifth Wheels
 
-**Price Range:** $42,000 - $239,000
+**Price Range:** $42,000 - $285,000
 
 **Years:** 2019 - 2025
