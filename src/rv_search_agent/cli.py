@@ -27,6 +27,43 @@ def open_fb_marketplace(query: str = None, min_price: int = None, max_price: int
     webbrowser.open(url)
 
 
+def open_rvtrader(query: str = None, min_price: int = None, max_price: int = None,
+                  min_year: int = None, max_year: int = None, rv_type: str = None):
+    """Open RV Trader search in browser."""
+    base_url = "https://www.rvtrader.com/rvs-for-sale"
+    params = []
+
+    if query:
+        params.append(f"keyword={quote(query)}")
+    if min_price:
+        params.append(f"priceMin={min_price}")
+    if max_price:
+        params.append(f"priceMax={max_price}")
+    if min_year:
+        params.append(f"yearMin={min_year}")
+    if max_year:
+        params.append(f"yearMax={max_year}")
+    if rv_type:
+        # Map common types to RV Trader categories
+        type_map = {
+            "class a": "Class%20A",
+            "class b": "Class%20B",
+            "class c": "Class%20C",
+            "travel trailer": "Travel%20Trailer",
+            "fifth wheel": "Fifth%20Wheel",
+        }
+        mapped = type_map.get(rv_type.lower(), quote(rv_type))
+        params.append(f"type={mapped}")
+
+    url = base_url
+    if params:
+        url += "?" + "&".join(params)
+
+    search_desc = query or "all RVs"
+    print(f"Opening RV Trader: {search_desc}")
+    webbrowser.open(url)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Search for RV listings",
@@ -93,12 +130,23 @@ Examples:
         action="store_true",
         help="Open Facebook Marketplace search in browser",
     )
+    parser.add_argument(
+        "--open-rvtrader",
+        action="store_true",
+        help="Open RV Trader search in browser",
+    )
 
     args = parser.parse_args()
 
     # Open Facebook Marketplace if requested
     if args.open_fb:
         open_fb_marketplace(args.query, args.min_price, args.max_price)
+        sys.exit(0)
+
+    # Open RV Trader if requested
+    if args.open_rvtrader:
+        open_rvtrader(args.query, args.min_price, args.max_price,
+                      args.min_year, args.max_year, args.rv_type)
         sys.exit(0)
 
     # Run search

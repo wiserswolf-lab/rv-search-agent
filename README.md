@@ -28,6 +28,9 @@ The easiest way to search for RVs:
 # Open Facebook Marketplace search in browser
 ./rv-search -q "Storyteller Overland" --open-fb
 
+# Open RV Trader search in browser
+./rv-search -q "Storyteller Overland" --open-rvtrader
+
 # Verbose output with full details
 ./rv-search -q "Storyteller" -v
 
@@ -50,6 +53,7 @@ The easiest way to search for RVs:
 | `-n, --max-results` | Number of results (default: 10) |
 | `-v, --verbose` | Show detailed listing information |
 | `--open-fb` | Open Facebook Marketplace search in browser |
+| `--open-rvtrader` | Open RV Trader search in browser |
 
 ## Python API
 
