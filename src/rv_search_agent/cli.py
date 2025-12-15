@@ -135,6 +135,11 @@ Examples:
         action="store_true",
         help="Open RV Trader search in browser",
     )
+    parser.add_argument(
+        "--sort-by",
+        choices=["price", "price-desc", "year", "year-desc"],
+        help="Sort results: price (low-high), price-desc (high-low), year, year-desc",
+    )
 
     args = parser.parse_args()
 
@@ -165,6 +170,17 @@ Examples:
     if not listings:
         print("No listings found matching your criteria.")
         sys.exit(0)
+
+    # Sort results if requested
+    if args.sort_by:
+        if args.sort_by == "price":
+            listings.sort(key=lambda x: x.price if x.price else float('inf'))
+        elif args.sort_by == "price-desc":
+            listings.sort(key=lambda x: x.price if x.price else 0, reverse=True)
+        elif args.sort_by == "year":
+            listings.sort(key=lambda x: x.year if x.year else 0)
+        elif args.sort_by == "year-desc":
+            listings.sort(key=lambda x: x.year if x.year else 0, reverse=True)
 
     print(f"Found {len(listings)} listing(s):\n")
 
