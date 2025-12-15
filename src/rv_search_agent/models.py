@@ -23,6 +23,7 @@ class RVListing:
     sleeping_capacity: Optional[int] = None
     description: Optional[str] = None
     image_urls: list[str] = field(default_factory=list)
+    source: Optional[str] = None  # Dealer, Facebook Marketplace, Craigslist, etc.
 
     def to_dict(self) -> dict:
         """Convert listing to dictionary."""
@@ -42,6 +43,7 @@ class RVListing:
             "sleeping_capacity": self.sleeping_capacity,
             "description": self.description,
             "image_urls": self.image_urls,
+            "source": self.source,
         }
 
     def summary(self) -> str:
