@@ -94,6 +94,22 @@ class TestSearchAPI:
         results = search_rv_listings(query="NonExistentBrandXYZ123")
         assert len(results) == 0
 
+    def test_search_by_max_mileage(self):
+        """Test search with maximum mileage filter."""
+        results = search_rv_listings(max_mileage=10000, max_results=50)
+        assert len(results) > 0
+        for listing in results:
+            # Listings with mileage should be under max
+            assert listing.mileage is None or listing.mileage <= 10000
+
+    def test_search_by_min_mileage(self):
+        """Test search with minimum mileage filter."""
+        results = search_rv_listings(min_mileage=20000, max_results=50)
+        assert len(results) > 0
+        for listing in results:
+            # Listings with mileage should be above min
+            assert listing.mileage is None or listing.mileage >= 20000
+
     def test_search_combined_filters(self):
         """Test search with multiple filters combined."""
         results = search_rv_listings(

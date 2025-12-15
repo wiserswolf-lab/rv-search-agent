@@ -57,6 +57,8 @@ The easiest way to search for RVs:
 | `--max-price` | Maximum price |
 | `--min-year` | Minimum year |
 | `--max-year` | Maximum year |
+| `--min-mileage` | Minimum mileage |
+| `--max-mileage` | Maximum mileage |
 | `-l, --location` | Location filter |
 | `-s, --source` | Source filter (Dealer, Facebook Marketplace) |
 | `-n, --max-results` | Number of results (default: 10) |

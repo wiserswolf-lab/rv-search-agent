@@ -107,6 +107,16 @@ Examples:
         help="Maximum year",
     )
     parser.add_argument(
+        "--min-mileage",
+        type=int,
+        help="Minimum mileage",
+    )
+    parser.add_argument(
+        "--max-mileage",
+        type=int,
+        help="Maximum mileage",
+    )
+    parser.add_argument(
         "-l", "--location",
         help="Location filter",
     )
@@ -162,6 +172,8 @@ Examples:
         max_price=args.max_price,
         min_year=args.min_year,
         max_year=args.max_year,
+        min_mileage=args.min_mileage,
+        max_mileage=args.max_mileage,
         location=args.location,
         source=args.source,
         max_results=args.max_results,

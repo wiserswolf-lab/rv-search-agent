@@ -513,6 +513,8 @@ def search_rv_listings(
     max_price: Optional[int] = None,
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,
+    min_mileage: Optional[int] = None,
+    max_mileage: Optional[int] = None,
     location: Optional[str] = None,
     source: Optional[str] = None,
     max_results: int = 20,
@@ -530,6 +532,8 @@ def search_rv_listings(
         max_price: Maximum price filter
         min_year: Minimum year filter
         max_year: Maximum year filter
+        min_mileage: Minimum mileage filter
+        max_mileage: Maximum mileage filter
         location: Region/location to search
         source: Filter by source (e.g., "Dealer", "Facebook Marketplace")
         max_results: Maximum number of results (default 20)
@@ -550,6 +554,8 @@ def search_rv_listings(
             max_price=max_price,
             min_year=min_year,
             max_year=max_year,
+            min_mileage=min_mileage,
+            max_mileage=max_mileage,
             location=location,
             source=source,
             max_results=max_results,
@@ -574,6 +580,8 @@ def _search_demo(
     max_price: Optional[int] = None,
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,
+    min_mileage: Optional[int] = None,
+    max_mileage: Optional[int] = None,
     location: Optional[str] = None,
     source: Optional[str] = None,
     max_results: int = 20,
@@ -602,6 +610,12 @@ def _search_demo(
             continue
 
         if max_year and listing.year and listing.year > max_year:
+            continue
+
+        if min_mileage and listing.mileage and listing.mileage < min_mileage:
+            continue
+
+        if max_mileage and listing.mileage and listing.mileage > max_mileage:
             continue
 
         if location and listing.location:
