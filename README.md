@@ -45,7 +45,24 @@ for listing in listings:
 | `min_year` | Minimum year | `2020` |
 | `max_year` | Maximum year | `2024` |
 | `location` | Location filter | `"California"`, `"Denver"` |
+| `source` | Listing source | `"Dealer"`, `"Facebook Marketplace"` |
 | `max_results` | Number of results | `10` |
+
+### Filter by Source
+
+```python
+# Facebook Marketplace only (private sellers, often lower prices)
+listings = search_rv_listings(
+    query='Storyteller',
+    source='Facebook Marketplace'
+)
+
+# Dealer listings only
+listings = search_rv_listings(
+    query='Storyteller',
+    source='Dealer'
+)
+```
 
 ### Use the AI Agent (Requires Anthropic API Key)
 
@@ -105,9 +122,23 @@ rv-search-agent/
 
 ## Demo Data
 
-The demo mode includes 12 sample listings covering:
-- Class A, B, C motorhomes
-- Travel trailers and fifth wheels
-- Popular brands: Winnebago, Thor, Jayco, Airstream, Storyteller Overland, etc.
-- Price range: $42,000 - $225,000
-- Years: 2019 - 2024
+The demo mode includes 28 sample listings covering:
+
+**Sources:**
+- 10 Dealer listings
+- 8 Facebook Marketplace listings (with mileage)
+
+**Storyteller Overland Models:**
+- Classic MODE (OG & XO)
+- Beast MODE (OG & XO)
+- Stealth MODE
+- Dark MODE
+
+**Other Brands:**
+- Winnebago, Thor, Jayco, Airstream, Coachmen, Fleetwood, etc.
+
+**Types:** Class A, B, C motorhomes, Travel Trailers, Fifth Wheels
+
+**Price Range:** $42,000 - $239,000
+
+**Years:** 2019 - 2025
