@@ -819,3 +819,207 @@ def _parse_rss_item(item: ET.Element) -> Optional[RVListing]:
 def get_available_regions() -> dict:
     """Return dictionary of available Craigslist regions."""
     return CRAIGSLIST_REGIONS.copy()
+
+
+def _search_serper(
+    query: Optional[str] = None,
+    rv_type: Optional[str] = None,
+    min_price: Optional[int] = None,
+    max_price: Optional[int] = None,
+    min_year: Optional[int] = None,
+    max_year: Optional[int] = None,
+    location: Optional[str] = None,
+    max_results: int = 20,
+) -> List[RVListing]:
+    """Search for RV listings using Serper API (Google Search)."""
+    api_key = os.getenv("SERPER_API_KEY")
+    if not api_key:
+        raise SearchAPIError(
+            "SERPER_API_KEY not set. Get a free key at https://serper.dev"
+        )
+
+    # Build search query
+    search_parts = []
+    if query:
+        search_parts.append(query)
+    if rv_type:
+        search_parts.append(rv_type)
+    if min_year:
+        search_parts.append(str(min_year))
+
+    # Add RV-specific terms
+    if not any(term in " ".join(search_parts).lower() for term in ["rv", "motorhome", "camper", "van"]):
+        search_parts.append("RV")
+
+    search_parts.append("for sale")
+
+    if location:
+        search_parts.append(location)
+
+    search_query = " ".join(search_parts)
+
+    # Search multiple sites
+    sites = ["rvtrader.com", "facebook.com/marketplace", "craigslist.org"]
+    all_listings = []
+
+    for site in sites:
+        site_query = f"site:{site} {search_query}"
+
+        try:
+            with httpx.Client(timeout=30) as client:
+                response = client.post(
+                    "https://google.serper.dev/search",
+                    headers={
+                        "X-API-KEY": api_key,
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "q": site_query,
+                        "num": min(max_results, 10),
+                    },
+                )
+                response.raise_for_status()
+                data = response.json()
+
+                for result in data.get("organic", []):
+                    listing = _parse_serper_result(result, site)
+                    if listing:
+                        # Apply filters
+                        if min_price and listing.price and listing.price < min_price:
+                            continue
+                        if max_price and listing.price and listing.price > max_price:
+                            continue
+                        if min_year and listing.year and listing.year < min_year:
+                            continue
+                        if max_year and listing.year and listing.year > max_year:
+                            continue
+                        all_listings.append(listing)
+
+        except httpx.HTTPError as e:
+            # Continue with other sites if one fails
+            print(f"Warning: Failed to search {site}: {e}")
+            continue
+
+    return all_listings[:max_results]
+
+
+def _parse_serper_result(result: dict, site: str) -> Optional[RVListing]:
+    """Parse a Serper search result into an RVListing."""
+    title = result.get("title", "")
+    url = result.get("link", "")
+    snippet = result.get("snippet", "")
+
+    if not title:
+        return None
+
+    # Determine source from site
+    source = None
+    if "rvtrader" in site:
+        source = "RV Trader"
+    elif "facebook" in site:
+        source = "Facebook Marketplace"
+    elif "craigslist" in site:
+        source = "Craigslist"
+
+    # Extract price from title or snippet
+    price = None
+    for text in [title, snippet]:
+        price_match = re.search(r"\$[\d,]+", text)
+        if price_match:
+            try:
+                price = int(price_match.group().replace("$", "").replace(",", ""))
+                break
+            except ValueError:
+                pass
+
+    # Extract year
+    year = None
+    for text in [title, snippet]:
+        year_match = re.search(r"\b(19|20)\d{2}\b", text)
+        if year_match:
+            potential_year = int(year_match.group())
+            if 1980 <= potential_year <= 2026:
+                year = potential_year
+                break
+
+    # Extract make
+    make = None
+    makes = [
+        "Winnebago", "Thor", "Jayco", "Coachmen", "Forest River",
+        "Keystone", "Fleetwood", "Newmar", "Tiffin", "Entegra",
+        "Airstream", "Grand Design", "Heartland", "Dutchmen",
+        "Storyteller", "Mercedes", "Pleasure-Way", "Roadtrek",
+        "Unity", "Leisure Travel", "Revel",
+    ]
+    for m in makes:
+        if m.lower() in title.lower():
+            make = m
+            break
+
+    # Extract RV type
+    rv_type = None
+    combined = f"{title} {snippet}"
+    if re.search(r"class\s*a", combined, re.IGNORECASE):
+        rv_type = "Class A"
+    elif re.search(r"class\s*b\+", combined, re.IGNORECASE):
+        rv_type = "Class B+"
+    elif re.search(r"class\s*b", combined, re.IGNORECASE):
+        rv_type = "Class B"
+    elif re.search(r"class\s*c", combined, re.IGNORECASE):
+        rv_type = "Class C"
+    elif re.search(r"travel\s*trailer", combined, re.IGNORECASE):
+        rv_type = "Travel Trailer"
+    elif re.search(r"fifth\s*wheel|5th\s*wheel", combined, re.IGNORECASE):
+        rv_type = "Fifth Wheel"
+
+    # Extract mileage
+    mileage = None
+    mileage_match = re.search(r"(\d{1,3}(?:,\d{3})*)\s*(?:miles|mi)", combined, re.IGNORECASE)
+    if mileage_match:
+        try:
+            mileage = int(mileage_match.group(1).replace(",", ""))
+        except ValueError:
+            pass
+
+    # Clean title
+    clean_title = re.sub(r"\s*-?\s*\$[\d,]+", "", title)
+    clean_title = re.sub(r"\s*\|.*$", "", clean_title).strip()
+
+    return RVListing(
+        title=clean_title or title,
+        price=price,
+        year=year,
+        make=make,
+        url=url,
+        description=snippet,
+        rv_type=rv_type,
+        mileage=mileage,
+        source=source,
+    )
+
+
+def search_rv_listings_live(
+    query: Optional[str] = None,
+    rv_type: Optional[str] = None,
+    min_price: Optional[int] = None,
+    max_price: Optional[int] = None,
+    min_year: Optional[int] = None,
+    max_year: Optional[int] = None,
+    location: Optional[str] = None,
+    max_results: int = 20,
+) -> List[RVListing]:
+    """
+    Search for live RV listings using Serper API.
+
+    Requires SERPER_API_KEY environment variable.
+    """
+    return _search_serper(
+        query=query,
+        rv_type=rv_type,
+        min_price=min_price,
+        max_price=max_price,
+        min_year=min_year,
+        max_year=max_year,
+        location=location,
+        max_results=max_results,
+    )

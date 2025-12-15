@@ -6,7 +6,7 @@ import sys
 import webbrowser
 from urllib.parse import quote
 
-from .search_api import search_rv_listings
+from .search_api import search_rv_listings, search_rv_listings_live, SearchAPIError
 
 
 def open_fb_marketplace(query: str = None, min_price: int = None, max_price: int = None):
@@ -150,6 +150,11 @@ Examples:
         choices=["price", "price-desc", "year", "year-desc", "mileage", "mileage-desc"],
         help="Sort results: price, price-desc, year, year-desc, mileage, mileage-desc",
     )
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Search live listings using Serper API (requires SERPER_API_KEY)",
+    )
 
     args = parser.parse_args()
 
@@ -165,19 +170,36 @@ Examples:
         sys.exit(0)
 
     # Run search
-    listings = search_rv_listings(
-        query=args.query,
-        rv_type=args.rv_type,
-        min_price=args.min_price,
-        max_price=args.max_price,
-        min_year=args.min_year,
-        max_year=args.max_year,
-        min_mileage=args.min_mileage,
-        max_mileage=args.max_mileage,
-        location=args.location,
-        source=args.source,
-        max_results=args.max_results,
-    )
+    try:
+        if args.live:
+            print("Searching live listings via Serper API...\n")
+            listings = search_rv_listings_live(
+                query=args.query,
+                rv_type=args.rv_type,
+                min_price=args.min_price,
+                max_price=args.max_price,
+                min_year=args.min_year,
+                max_year=args.max_year,
+                location=args.location,
+                max_results=args.max_results,
+            )
+        else:
+            listings = search_rv_listings(
+                query=args.query,
+                rv_type=args.rv_type,
+                min_price=args.min_price,
+                max_price=args.max_price,
+                min_year=args.min_year,
+                max_year=args.max_year,
+                min_mileage=args.min_mileage,
+                max_mileage=args.max_mileage,
+                location=args.location,
+                source=args.source,
+                max_results=args.max_results,
+            )
+    except SearchAPIError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
     if not listings:
         print("No listings found matching your criteria.")

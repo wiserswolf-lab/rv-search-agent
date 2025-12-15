@@ -66,6 +66,23 @@ The easiest way to search for RVs:
 | `--open-fb` | Open Facebook Marketplace search in browser |
 | `--open-rvtrader` | Open RV Trader search in browser |
 | `--sort-by` | Sort: price, price-desc, year, year-desc, mileage, mileage-desc |
+| `--live` | Search live listings via Serper API (requires SERPER_API_KEY) |
+
+### Live Search (Serper API)
+
+Search real listings from RV Trader, Facebook Marketplace, and Craigslist:
+
+```bash
+# 1. Get free API key (2,500 searches/month)
+#    https://serper.dev
+
+# 2. Add to .env file
+echo "SERPER_API_KEY=your-key-here" >> .env
+
+# 3. Search live listings
+./rv-search -q "Unity U24RL" --live
+./rv-search -q "Storyteller Overland" --min-year 2023 --live
+```
 
 ## Python API
 
