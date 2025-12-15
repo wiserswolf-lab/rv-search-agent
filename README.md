@@ -25,6 +25,9 @@ The easiest way to search for RVs:
 # Search Class C under $100k
 ./rv-search -t "Class C" --max-price 100000
 
+# Open Facebook Marketplace search in browser
+./rv-search -q "Storyteller Overland" --open-fb
+
 # Verbose output with full details
 ./rv-search -q "Storyteller" -v
 
@@ -46,6 +49,7 @@ The easiest way to search for RVs:
 | `-s, --source` | Source filter (Dealer, Facebook Marketplace) |
 | `-n, --max-results` | Number of results (default: 10) |
 | `-v, --verbose` | Show detailed listing information |
+| `--open-fb` | Open Facebook Marketplace search in browser |
 
 ## Python API
 
