@@ -851,7 +851,9 @@ def _search_serper(
     if not any(term in " ".join(search_parts).lower() for term in ["rv", "motorhome", "camper", "van"]):
         search_parts.append("RV")
 
+    # Ensure we're finding active listings, not sold ones
     search_parts.append("for sale")
+    search_parts.append("-sold -pending -unavailable")
 
     if location:
         search_parts.append(location)
@@ -859,7 +861,7 @@ def _search_serper(
     search_query = " ".join(search_parts)
 
     # Search multiple sites
-    sites = ["rvtrader.com", "facebook.com/marketplace", "craigslist.org"]
+    sites = ["rvtrader.com", "facebook.com/marketplace", "craigslist.org", "conejorv.com"]
     all_listings = []
 
     for site in sites:
@@ -882,6 +884,16 @@ def _search_serper(
                 data = response.json()
 
                 for result in data.get("organic", []):
+                    # Skip sold/inactive listings
+                    title_lower = result.get("title", "").lower()
+                    snippet_lower = result.get("snippet", "").lower()
+                    combined_text = f"{title_lower} {snippet_lower}"
+
+                    inactive_keywords = ["sold", "pending", "unavailable", "no longer available",
+                                        "listing has ended", "this listing is no longer", "item sold"]
+                    if any(keyword in combined_text for keyword in inactive_keywords):
+                        continue
+
                     listing = _parse_serper_result(result, site)
                     if listing:
                         # Apply filters
@@ -920,6 +932,8 @@ def _parse_serper_result(result: dict, site: str) -> Optional[RVListing]:
         source = "Facebook Marketplace"
     elif "craigslist" in site:
         source = "Craigslist"
+    elif "conejorv" in site:
+        source = "Conejo RV"
 
     # Extract price from title or snippet
     price = None
