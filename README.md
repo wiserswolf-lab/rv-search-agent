@@ -31,6 +31,12 @@ The easiest way to search for RVs:
 # Open RV Trader search in browser
 ./rv-search -q "Storyteller Overland" --open-rvtrader
 
+# Sort by price (lowest first)
+./rv-search -q "Storyteller" --sort-by price
+
+# Sort by price (highest first)
+./rv-search -q "Unity" --sort-by price-desc
+
 # Verbose output with full details
 ./rv-search -q "Storyteller" -v
 
@@ -54,6 +60,7 @@ The easiest way to search for RVs:
 | `-v, --verbose` | Show detailed listing information |
 | `--open-fb` | Open Facebook Marketplace search in browser |
 | `--open-rvtrader` | Open RV Trader search in browser |
+| `--sort-by` | Sort results: price, price-desc, year, year-desc |
 
 ## Python API
 
