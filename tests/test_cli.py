@@ -3,12 +3,11 @@
 import os
 import subprocess
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
 sys.path.insert(0, "src")
-from rv_search_agent.cli import main
 from rv_search_agent.search_api import (
     search_rv_listings,
     search_rv_listings_live,
