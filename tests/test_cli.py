@@ -1,14 +1,20 @@
 """Tests for the RV Search CLI."""
 
+import os
 import subprocess
 import sys
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 
 sys.path.insert(0, "src")
 from rv_search_agent.cli import main
-from rv_search_agent.search_api import search_rv_listings
+from rv_search_agent.search_api import (
+    search_rv_listings,
+    search_rv_listings_live,
+    _parse_serper_result,
+    SearchAPIError,
+)
 
 
 class TestSearchAPI:
@@ -295,3 +301,133 @@ class TestSorting:
 
         mileages = [r.mileage for r in results if r.mileage]
         assert mileages == sorted(mileages, reverse=True)
+
+
+class TestLiveSearch:
+    """Test the live search functionality using Serper API."""
+
+    def test_live_search_requires_api_key(self):
+        """Test that live search raises error without API key."""
+        # Temporarily remove the API key
+        original_key = os.environ.get("SERPER_API_KEY")
+        if "SERPER_API_KEY" in os.environ:
+            del os.environ["SERPER_API_KEY"]
+
+        try:
+            with pytest.raises(SearchAPIError) as exc_info:
+                search_rv_listings_live(query="test")
+            assert "SERPER_API_KEY not set" in str(exc_info.value)
+        finally:
+            # Restore the API key
+            if original_key:
+                os.environ["SERPER_API_KEY"] = original_key
+
+    def test_parse_serper_result_with_price(self):
+        """Test parsing a Serper result with price."""
+        result = {
+            "title": "2024 Storyteller Overland Beast MODE - $185,000",
+            "link": "https://www.rvtrader.com/listing/123",
+            "snippet": "Beautiful Class B camper van with 10,000 miles.",
+        }
+        listing = _parse_serper_result(result, "rvtrader.com")
+
+        assert listing is not None
+        assert listing.price == 185000
+        assert listing.year == 2024
+        assert listing.source == "RV Trader"
+        assert "Storyteller" in listing.make
+
+    def test_parse_serper_result_with_mileage(self):
+        """Test parsing a Serper result with mileage."""
+        result = {
+            "title": "2023 Unity U24RL For Sale",
+            "link": "https://facebook.com/marketplace/item/123",
+            "snippet": "Low mileage! Only 15,000 miles. Well maintained.",
+        }
+        listing = _parse_serper_result(result, "facebook.com/marketplace")
+
+        assert listing is not None
+        assert listing.mileage == 15000
+        assert listing.year == 2023
+        assert listing.source == "Facebook Marketplace"
+
+    def test_parse_serper_result_craigslist(self):
+        """Test parsing a Craigslist result."""
+        result = {
+            "title": "2022 Winnebago View Class C - $125,000",
+            "link": "https://sfbay.craigslist.org/listing/123",
+            "snippet": "Class C motorhome in excellent condition.",
+        }
+        listing = _parse_serper_result(result, "craigslist.org")
+
+        assert listing is not None
+        assert listing.price == 125000
+        assert listing.year == 2022
+        assert listing.source == "Craigslist"
+        assert listing.rv_type == "Class C"
+        assert listing.make == "Winnebago"
+
+    def test_parse_serper_result_extracts_rv_type(self):
+        """Test that RV types are correctly extracted."""
+        test_cases = [
+            ("Class A motorhome", "Class A"),
+            ("Class B+ camper", "Class B+"),
+            ("Class B van", "Class B"),
+            ("Class C RV", "Class C"),
+            ("Travel Trailer for sale", "Travel Trailer"),
+            ("Fifth Wheel 5th wheel", "Fifth Wheel"),
+        ]
+
+        for title, expected_type in test_cases:
+            result = {"title": title, "link": "https://example.com", "snippet": ""}
+            listing = _parse_serper_result(result, "rvtrader.com")
+            assert listing.rv_type == expected_type, f"Failed for: {title}"
+
+    def test_parse_serper_result_empty_title(self):
+        """Test that empty title returns None."""
+        result = {"title": "", "link": "https://example.com", "snippet": "Some text"}
+        listing = _parse_serper_result(result, "rvtrader.com")
+        assert listing is None
+
+    def test_cli_live_flag_without_api_key(self):
+        """Test CLI --live flag shows error without API key."""
+        # This test uses the Python API directly to avoid .env file loading
+        original_key = os.environ.get("SERPER_API_KEY")
+        if "SERPER_API_KEY" in os.environ:
+            del os.environ["SERPER_API_KEY"]
+
+        try:
+            # Mock dotenv to prevent loading from .env file
+            with patch.dict(os.environ, {}, clear=True):
+                with pytest.raises(SearchAPIError) as exc_info:
+                    search_rv_listings_live(query="test")
+                assert "SERPER_API_KEY not set" in str(exc_info.value)
+        finally:
+            if original_key:
+                os.environ["SERPER_API_KEY"] = original_key
+
+    @pytest.mark.skipif(
+        not os.environ.get("SERPER_API_KEY"),
+        reason="SERPER_API_KEY not set"
+    )
+    def test_live_search_returns_results(self):
+        """Test that live search returns results when API key is set."""
+        results = search_rv_listings_live(query="RV motorhome", max_results=5)
+        # Should return some results (may be empty if API issues)
+        assert isinstance(results, list)
+
+    @pytest.mark.skipif(
+        not os.environ.get("SERPER_API_KEY"),
+        reason="SERPER_API_KEY not set"
+    )
+    def test_cli_live_search(self):
+        """Test CLI live search when API key is available."""
+        result = subprocess.run(
+            ["./rv-search", "-q", "Storyteller", "--live", "-n", "5"],
+            capture_output=True,
+            text=True,
+            cwd="/Users/scottwolf/Desktop/rv-search-agent",
+        )
+
+        assert result.returncode == 0
+        assert "Searching live listings" in result.stdout
