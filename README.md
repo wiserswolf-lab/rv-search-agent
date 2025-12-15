@@ -11,7 +11,43 @@ source venv/bin/activate
 pip install anthropic httpx python-dotenv
 ```
 
-## Usage
+## Command Line Interface
+
+The easiest way to search for RVs:
+
+```bash
+# Search for Storyteller Overland
+./rv-search -q "Storyteller"
+
+# Search Facebook Marketplace only, 2024+
+./rv-search -q "Storyteller" --min-year 2024 -s "Facebook"
+
+# Search Class C under $100k
+./rv-search -t "Class C" --max-price 100000
+
+# Verbose output with full details
+./rv-search -q "Storyteller" -v
+
+# Show help
+./rv-search --help
+```
+
+### CLI Options
+
+| Option | Description |
+|--------|-------------|
+| `-q, --query` | Search query (make, model, keywords) |
+| `-t, --type` | RV type (Class A, B, C, Travel Trailer, Fifth Wheel) |
+| `--min-price` | Minimum price |
+| `--max-price` | Maximum price |
+| `--min-year` | Minimum year |
+| `--max-year` | Maximum year |
+| `-l, --location` | Location filter |
+| `-s, --source` | Source filter (Dealer, Facebook Marketplace) |
+| `-n, --max-results` | Number of results (default: 10) |
+| `-v, --verbose` | Show detailed listing information |
+
+## Python API
 
 ### Search for RVs (Demo Mode - No API Key Required)
 
@@ -110,11 +146,13 @@ for listing in listings:
 
 ```
 rv-search-agent/
+├── rv-search              # CLI wrapper script
 ├── src/rv_search_agent/
 │   ├── __init__.py
-│   ├── agent.py        # Claude-powered agent
-│   ├── models.py       # RVListing data model
-│   └── search_api.py   # Search with demo data + Craigslist RSS
+│   ├── agent.py           # Claude-powered agent
+│   ├── cli.py             # Command-line interface
+│   ├── models.py          # RVListing data model
+│   └── search_api.py      # Search with demo data + Craigslist RSS
 ├── .env.example
 ├── pyproject.toml
 └── README.md
