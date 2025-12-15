@@ -37,6 +37,9 @@ The easiest way to search for RVs:
 # Sort by price (highest first)
 ./rv-search -q "Unity" --sort-by price-desc
 
+# Sort by mileage (lowest first)
+./rv-search -s "Facebook" --sort-by mileage
+
 # Verbose output with full details
 ./rv-search -q "Storyteller" -v
 
@@ -60,7 +63,7 @@ The easiest way to search for RVs:
 | `-v, --verbose` | Show detailed listing information |
 | `--open-fb` | Open Facebook Marketplace search in browser |
 | `--open-rvtrader` | Open RV Trader search in browser |
-| `--sort-by` | Sort results: price, price-desc, year, year-desc |
+| `--sort-by` | Sort: price, price-desc, year, year-desc, mileage, mileage-desc |
 
 ## Python API
 

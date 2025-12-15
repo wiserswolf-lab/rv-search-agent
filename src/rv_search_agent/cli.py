@@ -137,8 +137,8 @@ Examples:
     )
     parser.add_argument(
         "--sort-by",
-        choices=["price", "price-desc", "year", "year-desc"],
-        help="Sort results: price (low-high), price-desc (high-low), year, year-desc",
+        choices=["price", "price-desc", "year", "year-desc", "mileage", "mileage-desc"],
+        help="Sort results: price, price-desc, year, year-desc, mileage, mileage-desc",
     )
 
     args = parser.parse_args()
@@ -181,6 +181,10 @@ Examples:
             listings.sort(key=lambda x: x.year if x.year else 0)
         elif args.sort_by == "year-desc":
             listings.sort(key=lambda x: x.year if x.year else 0, reverse=True)
+        elif args.sort_by == "mileage":
+            listings.sort(key=lambda x: x.mileage if x.mileage else float('inf'))
+        elif args.sort_by == "mileage-desc":
+            listings.sort(key=lambda x: x.mileage if x.mileage else 0, reverse=True)
 
     print(f"Found {len(listings)} listing(s):\n")
 

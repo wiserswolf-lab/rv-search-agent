@@ -263,3 +263,19 @@ class TestSorting:
 
         years = [r.year for r in results if r.year]
         assert years == sorted(years, reverse=True)
+
+    def test_sort_mileage_ascending(self):
+        """Test that mileage sorting works correctly."""
+        results = search_rv_listings(source="Facebook", max_results=20)
+        results.sort(key=lambda x: x.mileage if x.mileage else float('inf'))
+
+        mileages = [r.mileage for r in results if r.mileage]
+        assert mileages == sorted(mileages)
+
+    def test_sort_mileage_descending(self):
+        """Test that mileage descending sorting works correctly."""
+        results = search_rv_listings(source="Facebook", max_results=20)
+        results.sort(key=lambda x: x.mileage if x.mileage else 0, reverse=True)
+
+        mileages = [r.mileage for r in results if r.mileage]
+        assert mileages == sorted(mileages, reverse=True)
